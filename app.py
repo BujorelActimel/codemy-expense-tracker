@@ -24,6 +24,7 @@ budget = {
     "balance": 0,
     "transactions": []
 }
+
 # starea aplicatiei
 current_screen = "main" # main sau add
 input_amount = ""
@@ -83,10 +84,84 @@ def get_total_expenses():
     return suma
 
 
+def draw_main_screen():
+    global budget
+    # titlu
+    screen.draw.text("Buget Personal", midtop=(WIDTH//2, 30), fontsize=36, color=BLACK)
+
+    # balance card
+    balance_card = Rect((WIDTH//2-150, 100), (300, 100))
+    screen.draw.filled_rect(balance_card, WHITE)
+    screen.draw.rect(balance_card, PRIMARY)
+
+    balance_text = "Current Balance:"
+    balance_amount = f'{budget["balance"]} Lei'
+
+    screen.draw.text(balance_text, midtop=(balance_card.centerx, balance_card.top + 20), fontsize=24, color=BLACK)
+    screen.draw.text(balance_amount, center=balance_card.center, fontsize=32, color=SUCCESS if budget["balance"] >= 0 else DANGER)
+
+    # income si expense
+    income_total = get_total_income()
+    expense_total = get_total_expenses()
+
+    income_card = Rect((WIDTH//4-100, 230), (200, 80))
+    screen.draw.filled_rect(income_card, WHITE)
+    screen.draw.rect(income_card, SUCCESS)
+    screen.draw.text("Total income:", midtop=(income_card.centerx, income_card.top + 10), fontsize=20, color=BLACK)
+    screen.draw.text(f"{income_total} Lei", center=income_card.center, fontsize=24, color=SUCCESS)
+
+    expense_card = Rect((WIDTH*3//4-100, 230), (200, 80))
+    screen.draw.filled_rect(expense_card, WHITE)
+    screen.draw.rect(expense_card, DANGER)
+    screen.draw.text("Total expenses:", midtop=(expense_card.centerx, expense_card.top + 10), fontsize=20, color=BLACK)
+    screen.draw.text(f"{expense_total} Lei", center=expense_card.center, fontsize=24, color=DANGER)
+
+    # lista de tranzactii
+    draw_transaction_list()
+
+    # butoane de adaugat
+    screen.draw.filled_rect(add_income_button, SUCCESS)
+    screen.draw.text("+ Add Income", center=add_income_button.center, fontsize=18, color=WHITE)
+
+    screen.draw.filled_rect(add_expense_button, DANGER)
+    screen.draw.text("+ Add Expense", center=add_expense_button.center, fontsize=18, color=WHITE)
+
+
+def draw_transaction_list():
+    screen.draw.text("Recent Transactions:", midtop=(WIDTH//2, 340), fontsize=24, color=BLACK)
+
+    recent_transactions = budget["transactions"][-3:] if len(budget["transactions"]) >= 3 else budget["transactions"]
+    
+
+    if recent_transactions:
+        y_pos = 380
+        for transaction in reversed(recent_transactions):
+            tx_rect = Rect((WIDTH//2-200, y_pos), (400, 40))
+            screen.draw.filled_rect(tx_rect, WHITE)
+
+            color = SUCCESS if transaction["is_income"] else DANGER
+            prefix = "+" if transaction["is_income"] else "-"
+
+            screen.draw.text(transaction["description"], midleft=(tx_rect.left + 10, tx_rect.centery), fontsize=18, color=BLACK)
+            screen.draw.text(f"{prefix}{transaction['amount']} Lei", midright=(tx_rect.right-10, tx_rect.centery), fontsize=18, color=color)
+
+            y_pos += 45
+    else:
+        screen.draw.text("No transactions. Add income or expenses.", center=(WIDTH//2, 410), fontsize=18, color=GRAY)
+
+
+def draw_add_screen():
+    pass
+
+
 def draw():
     screen.fill(BACKGROUND)
-    screen.draw.text("Buget Personal", center=(WIDTH//2, HEIGHT//2), fontsize=36, color=BLACK)
+
+    if current_screen == "main":
+        draw_main_screen()
+    else:
+        draw_add_screen
 
 
-pgzrun.go()
 load_budget()
+pgzrun.go()
