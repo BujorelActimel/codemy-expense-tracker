@@ -26,7 +26,7 @@ budget = {
 }
 
 # starea aplicatiei
-current_screen = "main" # main sau add
+current_screen = "add" # main sau add
 input_amount = ""
 input_description = ""
 is_income = True
@@ -36,8 +36,8 @@ add_income_button = Rect((WIDTH//2 - 180, HEIGHT-80), (160, 50))
 add_expense_button = Rect((WIDTH//2 + 20, HEIGHT-80), (160, 50))
 back_button = Rect((20, 20), (100, 40))
 save_button = Rect((WIDTH//2 -75, 340), (150, 50))
-amount_input = Rect((WIDTH//2-150, 160), (300, 400))
-description_input = Rect((WIDTH//2-150, 240), (300, 400))
+amount_input = Rect((WIDTH//2-150, 160), (300, 40))
+description_input = Rect((WIDTH//2-150, 240), (300, 40))
 
 
 def load_budget():
@@ -75,6 +75,7 @@ def get_total_income():
         if transaction["is_income"]:
             suma += transaction["amount"]
     return suma
+
 
 def get_total_expenses():
     suma = 0
@@ -151,7 +152,42 @@ def draw_transaction_list():
 
 
 def draw_add_screen():
-    pass
+    # Titlu
+    if is_income:
+        title = "Adauga Venit"
+        title_color = SUCCESS
+    else:
+        title = "Adauga Cheltuiala"
+        title_color = DANGER
+
+    # title = "Adauga Venit" if is_income else "Adauga Cheltuiala"
+    # title_color = SUCCESS if is_income else DANGER
+
+    screen.draw.text(title, midtop=(WIDTH//2, 30), fontsize=32, color=title_color)
+
+    # Buton inapoi
+    screen.draw.filled_rect(back_button, PRIMARY)
+    screen.draw.text("Inapoi", center=back_button.center, fontsize=18, color=WHITE)
+
+    # Formular
+    # Camp suma
+    screen.draw.text("Suma (Lei):", midtop=(WIDTH//2, 130), fontsize=20, color=BLACK)
+    screen.draw.filled_rect(amount_input, WHITE)
+    screen.draw.rect(amount_input, BLACK)
+    screen.draw.text(input_amount, midleft=(amount_input.left+10, amount_input.centery), fontsize=20, color=BLACK)
+
+
+    # Camp descrierea
+    screen.draw.text("Descriere:", midtop=(WIDTH//2, 210), fontsize=20, color=BLACK)
+    screen.draw.filled_rect(description_input, WHITE)
+    screen.draw.rect(description_input, BLACK)
+    screen.draw.text(input_description, midleft=(description_input.left+10, description_input.centery), fontsize=20, color=BLACK)
+
+
+    # Buton salvare
+    screen.draw.filled_rect(save_button, title_color)
+    screen.draw.text("Salveaza", center=save_button.center, fontsize=20, color=WHITE)
+
 
 
 def draw():
@@ -160,7 +196,7 @@ def draw():
     if current_screen == "main":
         draw_main_screen()
     else:
-        draw_add_screen
+        draw_add_screen()
 
 
 load_budget()
