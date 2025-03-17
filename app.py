@@ -26,9 +26,11 @@ budget = {
 }
 
 # starea aplicatiei
-current_screen = "add" # main sau add
+current_screen = "main" # main sau add
 input_amount = ""
 input_description = ""
+is_amount_active = False
+is_description_active = False
 is_income = True
 
 # elemente grafice
@@ -173,14 +175,14 @@ def draw_add_screen():
     # Camp suma
     screen.draw.text("Suma (Lei):", midtop=(WIDTH//2, 130), fontsize=20, color=BLACK)
     screen.draw.filled_rect(amount_input, WHITE)
-    screen.draw.rect(amount_input, BLACK)
+    screen.draw.rect(amount_input, PRIMARY if is_amount_active else BLACK)
     screen.draw.text(input_amount, midleft=(amount_input.left+10, amount_input.centery), fontsize=20, color=BLACK)
 
 
     # Camp descrierea
     screen.draw.text("Descriere:", midtop=(WIDTH//2, 210), fontsize=20, color=BLACK)
     screen.draw.filled_rect(description_input, WHITE)
-    screen.draw.rect(description_input, BLACK)
+    screen.draw.rect(description_input, PRIMARY if is_description_active else BLACK)
     screen.draw.text(input_description, midleft=(description_input.left+10, description_input.centery), fontsize=20, color=BLACK)
 
 
@@ -198,6 +200,78 @@ def draw():
     else:
         draw_add_screen()
 
+
+def on_mouse_down(pos):
+    global current_screen, is_amount_active, is_description_active, is_income, input_amount, input_description
+
+    if current_screen == "main":
+        if add_income_button.collidepoint(pos):
+            current_screen = "add"
+            is_income = True
+            input_amount = ""
+            input_description = ""
+            is_amount_active = False
+            is_description_active = False
+
+        elif add_expense_button.collidepoint(pos):
+            current_screen = "add"
+            is_income = False
+            input_amount = ""
+            input_description = ""
+            is_amount_active = False
+            is_description_active = False
+
+
+    elif current_screen == "add":
+        if back_button.collidepoint(pos):
+            current_screen = "main"
+
+        elif amount_input.collidepoint(pos):
+            is_amount_active = True
+            is_description_active = False
+
+        elif description_input.collidepoint(pos):
+            is_amount_active = False
+            is_description_active = True
+
+        elif save_button.collidepoint(pos):
+            if not input_amount:
+                print("Suma nu trbuie lasata goala")
+                return
+            
+            amount = float(input_amount)
+            if not is_description_active:
+                print("Descrirerea nu trbuie lasata goala")
+                return
+            
+            add_transaction(amount, input_description, is_income)
+
+            input_amount = ""
+            input_description = ""
+            current_screen = "main"
+            
+
+
+
+def on_key_down(key, mod, unicode):
+    global input_amount, input_description
+
+    if current_screen == "add":
+        if is_amount_active:
+            if key == keys.BACKSPACE:
+                input_amount = input_amount[:-1]
+            elif unicode.isdigit() or unicode == '.':
+                if unicode == '.' and '.' in input_amount:
+                    return
+                if len(input_amount) < 20:
+                    input_amount += unicode
+
+        elif is_description_active:
+            if key == keys.BACKSPACE:
+                input_description = input_description[:-1]
+            elif key != keys.RETURN:
+                if len(input_description) < 30:
+                    input_description += unicode
 
 load_budget()
 pgzrun.go()
